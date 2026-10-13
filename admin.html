@@ -1,0 +1,147 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio Admin Demo</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .admin { max-width: 760px; margin: 55px auto; }
+    .admin-panel { padding: 25px; margin-top: 20px; }
+    .admin h1 { font-family: "Space Grotesk", sans-serif; }
+    .admin label { display: grid; gap: 8px; margin-top: 16px; }
+    .admin input, .admin textarea {
+      padding: 12px; background: #111629;
+      color: white; border: 1px solid #ffffff22;
+      border-radius: 9px; width: 100%;
+    }
+    .admin button { margin-top: 15px; }
+    .warning { color: #fbbf24; margin-top: 12px; font-size: .85rem; }
+    .saved-item { padding: 15px 0; border-bottom: 1px solid #ffffff20; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <nav class="nav container">
+      <a class="logo" href="index.html">✳ PORTFOLIO ADMIN</a>
+      <a href="index.html" class="nav-button">View Website ↗</a>
+    </nav>
+  </header>
+
+  <main class="admin container">
+    <p class="eyebrow">LOCAL DEMO</p>
+    <h1 class="section-title">Admin <span class="gradient-text">Dashboard</span></h1>
+
+    <div class="glass-card admin-panel">
+      <p class="warning">
+        Demo only: password is visible in the source code.
+        Data is stored in this browser and is not secure.
+      </p>
+
+      <div id="loginArea">
+        <label>Demo password
+          <input type="password" id="password" placeholder="Enter demo password">
+        </label>
+        <button class="btn btn-primary" id="login">Unlock Dashboard</button>
+        <p id="loginMessage"></p>
+      </div>
+
+      <div id="dashboard" hidden>
+        <h2>Project Notes</h2>
+        <p class="section-intro">These notes are not published on your portfolio.</p>
+
+        <label>Project title
+          <input id="projectTitle" placeholder="Project title">
+        </label>
+        <label>Project summary
+          <textarea id="projectSummary" rows="3" placeholder="Project summary"></textarea>
+        </label>
+
+        <button class="btn btn-primary" id="addProject">Add Note</button>
+        <div id="projectList"></div>
+        <button class="btn btn-outline" id="logout">Lock Dashboard</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const DEMO_PASSWORD = "portfolio123";
+
+    const loginArea = document.getElementById("loginArea");
+    const dashboard = document.getElementById("dashboard");
+    const loginMessage = document.getElementById("loginMessage");
+
+    document.getElementById("login").addEventListener("click", () => {
+      if (document.getElementById("password").value === DEMO_PASSWORD) {
+        loginArea.hidden = true;
+        dashboard.hidden = false;
+        renderProjects();
+      } else {
+        loginMessage.textContent = "Incorrect password.";
+      }
+    });
+
+    function renderProjects() {
+      const projects = JSON.parse(
+        localStorage.getItem("portfolioDemoNotes") || "[]"
+      );
+      const list = document.getElementById("projectList");
+      list.replaceChildren();
+
+      projects.forEach((project, index) => {
+        const item = document.createElement("div");
+        item.className = "saved-item";
+
+        const title = document.createElement("strong");
+        title.textContent = project.title;
+
+        const summary = document.createElement("p");
+        summary.textContent = project.summary;
+
+        const remove = document.createElement("button");
+        remove.className = "btn btn-outline";
+        remove.textContent = "Remove";
+
+        remove.addEventListener("click", () => {
+          const all = JSON.parse(
+            localStorage.getItem("portfolioDemoNotes") || "[]"
+          );
+          all.splice(index, 1);
+          localStorage.setItem("portfolioDemoNotes", JSON.stringify(all));
+          renderProjects();
+        });
+
+        item.append(title, summary, remove);
+        list.append(item);
+      });
+    }
+
+    document.getElementById("addProject").addEventListener("click", () => {
+      const title = document.getElementById("projectTitle").value.trim();
+      const summary = document.getElementById("projectSummary").value.trim();
+
+      if (!title || !summary) {
+        alert("Please enter a title and summary.");
+        return;
+      }
+
+      const projects = JSON.parse(
+        localStorage.getItem("portfolioDemoNotes") || "[]"
+      );
+      projects.push({ title, summary });
+      localStorage.setItem("portfolioDemoNotes", JSON.stringify(projects));
+
+      document.getElementById("projectTitle").value = "";
+      document.getElementById("projectSummary").value = "";
+      renderProjects();
+    });
+
+    document.getElementById("logout").addEventListener("click", () => {
+      dashboard.hidden = true;
+      loginArea.hidden = false;
+      document.getElementById("password").value = "";
+    });
+  </script>
+</body>
+</html>
